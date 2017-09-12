@@ -856,7 +856,7 @@ class MusicBot(discord.Client):
 
         if permissions.max_songs and player.playlist.count_for_user(author) >= permissions.max_songs:
             raise exceptions.PermissionsError(
-                "You have reached your enqueued song limit (%s)" % permissions.max_songs, expire_in=30
+                "You have reached your enqueued song limit (%s) <:wheederp:230400281966411776>" % permissions.max_songs, expire_in=30
             )
 
         await self.send_typing(channel)
@@ -1025,7 +1025,7 @@ class MusicBot(discord.Client):
         else:
             try:
                 time_until = await player.playlist.estimate_time_until(position, player)
-                reply_text += ' - estimated time until playing: %s'
+                reply_text += ' - estimated time until playing: %s <:wheeok:333335895186866186>'
             except:
                 traceback.print_exc()
                 time_until = ''
@@ -1378,7 +1378,7 @@ class MusicBot(discord.Client):
             await asyncio.sleep(0.6)
 
         await self.safe_delete_message(hand, quiet=True)
-        return Response(":ok_hand:", delete_after=15)
+        return Response("<:wheeok:333335895186866186>", delete_after=15)
 
     async def cmd_clear(self, player, author):
         """
@@ -1749,7 +1749,7 @@ class MusicBot(discord.Client):
         except Exception as e:
             raise exceptions.CommandError(e, expire_in=20)
 
-        return Response(":ok_hand:", delete_after=20)
+        return Response("<:wheeok:333335895186866186>", delete_after=20)
 
     @owner_only
     async def cmd_setnick(self, server, channel, leftover_args, nick):
@@ -1770,7 +1770,7 @@ class MusicBot(discord.Client):
         except Exception as e:
             raise exceptions.CommandError(e, expire_in=20)
 
-        return Response(":ok_hand:", delete_after=20)
+        return Response("<:wheeok:333335895186866186>", delete_after=20)
 
     @owner_only
     async def cmd_setavatar(self, message, url=None):
@@ -1795,7 +1795,7 @@ class MusicBot(discord.Client):
         except Exception as e:
             raise exceptions.CommandError("Unable to change avatar: %s" % e, expire_in=20)
 
-        return Response(":ok_hand:", delete_after=20)
+        return Response("<:wheeok:333335895186866186>", delete_after=20)
 
 
     async def cmd_disconnect(self, server):
@@ -1803,12 +1803,12 @@ class MusicBot(discord.Client):
         return Response(":hear_no_evil:", delete_after=20)
 
     async def cmd_restart(self, channel):
-        await self.safe_send_message(channel, ":wave:")
+        await self.safe_send_message(channel, "<:wheewave:282219767123935232>")
         await self.disconnect_all_voice_clients()
         raise exceptions.RestartSignal
 
     async def cmd_shutdown(self, channel):
-        await self.safe_send_message(channel, ":wave:")
+        await self.safe_send_message(channel, "<:wheewave:282219767123935232>")
         await self.disconnect_all_voice_clients()
         raise exceptions.TerminateSignal
 
