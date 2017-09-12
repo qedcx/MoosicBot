@@ -1474,7 +1474,7 @@ class MusicBot(discord.Client):
         # Currently is recounted if they vote, deafen, then vote
 
         num_voice = sum(1 for m in voice_channel.voice_members if not (
-            m.deaf or m.self_deaf or m.id in [self.config.owner_id, self.user.id]))
+            m.deaf or m.self_deaf or m.id == self.user.id))
 
         num_skips = player.skip_state.add_skipper(author.id, message)
 
