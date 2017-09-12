@@ -77,6 +77,7 @@ class MusicBot(discord.Client):
 
         self.blacklist = set(load_file(self.config.blacklist_file))
         self.autoplaylist = load_file(self.config.auto_playlist_file)
+        self.autoplaylistposition = len(self.autoplaylist)
         self.downloader = downloader.Downloader(download_folder='audio_cache')
 
         self.exit_signal = None
@@ -413,10 +414,19 @@ class MusicBot(discord.Client):
     async def on_player_stop(self, **_):
         await self.update_now_playing()
 
+    async def next_autoplaylist_entry(self):
+        self.autoplaylistposition += 1
+        
+        if self.autoplaylistposition >= len(self.autoplaylist):
+            self.autoplaylistposition = 0
+            shuffle(self.autoplaylist) #reshuffle
+        
+        return self.autoplaylist[self.autoplaylistposition]
+
     async def on_player_finished_playing(self, player, **_):
         if not player.playlist.entries and not player.current_entry and self.config.auto_playlist:
             while self.autoplaylist:
-                song_url = choice(self.autoplaylist)
+                song_url = await self.next_autoplaylist_entry()
                 info = await self.downloader.safe_extract_info(player.playlist.loop, song_url, download=False, process=False)
 
                 if not info:
