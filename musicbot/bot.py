@@ -1773,7 +1773,6 @@ class MusicBot(discord.Client):
         return Response(":mailbox_with_mail:", delete_after=20)
 
 
-    @owner_only
     async def cmd_setname(self, leftover_args, name):
         """
         Usage:
@@ -1792,7 +1791,6 @@ class MusicBot(discord.Client):
 
         return Response("<:wheeok:333335895186866186>", delete_after=20)
 
-    @owner_only
     async def cmd_setnick(self, server, channel, leftover_args, nick):
         """
         Usage:
@@ -1813,7 +1811,6 @@ class MusicBot(discord.Client):
 
         return Response("<:wheeok:333335895186866186>", delete_after=20)
 
-    @owner_only
     async def cmd_setavatar(self, message, url=None):
         """
         Usage:
