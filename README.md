@@ -7,6 +7,7 @@ For any related questions you can contact **Yebafan#3517** on Discord.
 ### Additional features
 - Volume normalization
 - Proper autoplaylist shuffling
-- Additional QoL commands (undo, remove etc.)
+- Additional QoL commands (undo, remove, modskip etc.)
+- Various QoL changes and bugfixes
 
 A list of original features and commands can be found at [SexualRhinocero's page](https://github.com/Just-Some-Bots/MusicBot).
