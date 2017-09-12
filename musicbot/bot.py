@@ -1884,7 +1884,7 @@ class MusicBot(discord.Client):
             return
 
         else:
-            self.safe_print("[Command] {0.id}/{0.name} ({1})".format(message.author, message_content))
+            self.safe_print("{2} [Command] {0.id}/{0.name} ({1})".format(message.author, message_content, time.strftime('%x %X')))
 
         user_permissions = self.permissions.for_user(message.author)
 
@@ -2037,18 +2037,18 @@ class MusicBot(discord.Client):
 
         if sum(1 for m in my_voice_channel.voice_members if m != after.server.me):
             if auto_paused and player.is_paused:
-                print("[config:autopause] Unpausing")
+                print("%s [config:autopause] Unpausing" % time.strftime('%x %X'))
                 self.server_specific_data[after.server]['auto_paused'] = False
                 player.resume()
         else:
             if not auto_paused and player.is_playing:
-                print("[config:autopause] Pausing")
+                print("%s [config:autopause] Pausing" % time.strftime('%x %X'))
                 self.server_specific_data[after.server]['auto_paused'] = True
                 player.pause()
 
     async def on_server_update(self, before:discord.Server, after:discord.Server):
         if before.region != after.region:
-            self.safe_print("[Servers] \"%s\" changed regions: %s -> %s" % (after.name, before.region, after.region))
+            self.safe_print("%s [Servers] \"%s\" changed regions: %s -> %s" % (time.strftime('%x %X'), after.name, before.region, after.region))
 
             await self.reconnect_voice_client(after)
 
