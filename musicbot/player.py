@@ -2,6 +2,10 @@ import os
 import asyncio
 import audioop
 import traceback
+import io
+import pydub
+import shlex
+import subprocess
 
 from enum import Enum
 from array import array
@@ -10,6 +14,7 @@ from shutil import get_terminal_size
 
 from .lib.event_emitter import EventEmitter
 
+from discord.voice_client import StreamPlayer
 
 class PatchedBuff:
     """
@@ -248,13 +253,32 @@ class MusicPlayer(EventEmitter):
                 # In-case there was a player, kill it. RIP.
                 self._kill_current_player()
 
-                self._current_player = self._monkeypatch_player(self.voice_client.create_ffmpeg_player(
-                    entry.filename,
-                    before_options="-nostdin",
-                    options="-vn -b:a 128k",
-                    # Threadsafe call soon, b/c after will be called from the voice playback thread.
-                    after=lambda: self.loop.call_soon_threadsafe(self._playback_finished)
-                ))
+                # Convert to raw audio
+                convertCommand = "ffmpeg -nostdin -i {} -f wav -ar {} -ac {} -loglevel warning -vn -b:a 128k pipe:1"
+                convertCommand = convertCommand.format(shlex.quote(entry.filename), self.voice_client.encoder.sampling_rate, self.voice_client.encoder.channels)
+                args = shlex.split(convertCommand)
+
+                try:
+                    p = subprocess.Popen(args, stdin=None, stdout=subprocess.PIPE, stderr=None)
+                except FileNotFoundError as e:
+                    print('ffmpeg/avconv was not found in your PATH environment variable')
+                    return
+                except subprocess.SubprocessError as e:
+                    print('Popen failed: {0.__name__} {1}'.format(type(e), str(e)))
+                    return
+
+                # Load into pydub
+                sound = pydub.AudioSegment(p.stdout)
+
+                # Normalize the volume
+                target_dBFS = -15
+                change_in_dBFS = target_dBFS - sound.dBFS
+                normalized_sound = sound.apply_gain(change_in_dBFS)
+
+                # Create a player for the song
+                newPlayer = StreamPlayer(io.BytesIO(normalized_sound.raw_data), self.voice_client.encoder, self.voice_client._connected, self.voice_client.play_audio, lambda: self.loop.call_soon_threadsafe(self._playback_finished))
+
+                self._current_player = self._monkeypatch_player(newPlayer)
                 self._current_player.setDaemon(True)
                 self._current_player.buff.volume = self.volume
 
