@@ -1,6 +1,6 @@
 # MoosicBot
 
-Fork of [RhinoBot: The music bot for Discord](https://github.com/Just-Some-Bots/MusicBot), modified for use in the (Mamamoo Discord)(https://discord.gg/Za5Zb79).
+Fork of [RhinoBot: The music bot for Discord](https://github.com/Just-Some-Bots/MusicBot), modified for use in the [Mamamoo Discord](https://discord.gg/Za5Zb79).
 
 For any related questions contact **Yebafan#3517** on the [Mamamoo Discord server](https://discord.gg/Za5Zb79).
 
