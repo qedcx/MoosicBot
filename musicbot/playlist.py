@@ -251,6 +251,30 @@ class Playlist(EventEmitter):
         if self.entries:
             return self.entries[0]
 
+    def remove(self, index):
+        try:
+            i = int(index)
+        except:
+            return False
+            
+        if i > len(self.entries) or i < 1:
+            return False
+        
+        del self.entries[i - 1]
+        return True
+        
+    def remove_last_of_author(self, author):
+        reversed_entries = reversed(self.entries)
+        index = len(self.entries) - 1
+        
+        for entry in reversed_entries:
+            if entry.meta.get('author', None) == author:
+                del self.entries[index]
+                return True
+            index = index - 1
+                
+        return False
+
     async def estimate_time_until(self, position, player):
         """
             (very) Roughly estimates the time till the queue will 'position'

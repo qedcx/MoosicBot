@@ -1461,6 +1461,32 @@ class MusicBot(discord.Client):
                 delete_after=20
             )
 
+    async def cmd_remove(self, player, index):
+        """
+        Usage:
+            {command_prefix}remove index
+
+        Removes a song from the queue at specified index.
+        """
+    
+        if player.playlist.remove(index):
+            return Response('Track nr. %s removed <:wheepout:230488438653190144>' % index, delete_after=10)
+        else:
+            return Response('There is no track with index "%s" in the queue <:wheederp:230400281966411776>' % index, delete_after=10)
+
+    async def cmd_undo(self, player, author):
+        """
+        Usage:
+            {command_prefix}undo
+
+        Removes your last queued song from the queue.
+        """
+    
+        if player.playlist.remove_last_of_author(author):
+            return Response('Track removed <:wheepout:230488438653190144>', delete_after=10)
+        else:
+            return Response('You don\'t have any song in the queue <:wheederp:230400281966411776>', delete_after=10)
+
     async def cmd_volume(self, message, player, new_volume=None):
         """
         Usage:
