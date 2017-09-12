@@ -1544,6 +1544,26 @@ class MusicBot(discord.Client):
                 raise exceptions.CommandError(
                     'Unreasonable volume provided: {}%. Provide a value between 1 and 100.'.format(new_volume), expire_in=20)
 
+    async def cmd_q(self, channel, player):
+        """
+        Usage:
+            {command_prefix}q
+
+        Prints the current song queue.
+        """
+        
+        return await self.cmd_queue(channel, player)
+                    
+    async def cmd_que(self, channel, player):
+        """
+        Usage:
+            {command_prefix}que
+
+        Prints the current song queue.
+        """
+    
+        return await self.cmd_queue(channel, player)
+
     async def cmd_queue(self, channel, player):
         """
         Usage:
