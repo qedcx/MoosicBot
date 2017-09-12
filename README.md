@@ -8,4 +8,5 @@ For any related questions contact **Yebafan#3517** on the Mamamoo Discord server
 - Volume normalization
 - Proper autoplaylist shuffling
 - Additional QoL commands (undo, remove etc.)
+
 A list of original features and commands can be found at [SexualRhinocero's page](https://github.com/Just-Some-Bots/MusicBot).
