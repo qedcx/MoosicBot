@@ -166,7 +166,7 @@ def main():
 
         except SyntaxError:
             traceback.print_exc()
-            break
+            tryagain = False
 
         except ImportError as e:
             if not tried_requirementstxt:
@@ -181,19 +181,19 @@ def main():
                 if err:
                     print("\nYou may need to %s to install dependencies." %
                           ['use sudo', 'run as admin'][sys.platform.startswith('win')])
-                    break
+                    tryagain = False
                 else:
                     print("\nOk lets hope it worked\n")
             else:
                 traceback.print_exc()
                 print("Unknown ImportError, exiting.")
-                break
+                tryagain = False
 
         except Exception as e:
             if hasattr(e, '__module__') and e.__module__ == 'musicbot.exceptions':
                 if e.__class__.__name__ == 'HelpfulError':
                     print(e.message)
-                    break
+                    tryagain = False
 
                 elif e.__class__.__name__ == "TerminateSignal":
                     break
@@ -205,19 +205,23 @@ def main():
 
         finally:
             if not m or not m.init_ok:
-                break
+                tryagain = False
 
             asyncio.set_event_loop(asyncio.new_event_loop())
             loops += 1
 
-        print("Cleaning up... ", end='')
-        gc.collect()
-        print("Done.")
+        if not tryagain and '-nostop' in sys.argv:
+            tryagain = True
 
-        sleeptime = min(loops * 2, max_wait_time)
-        if sleeptime:
-            print("Restarting in {} seconds...".format(loops*2))
-            time.sleep(sleeptime)
+        if tryagain:
+            print("Cleaning up... ", end='')
+            gc.collect()
+            print("Done.")
+
+            sleeptime = min(loops * 2, max_wait_time)
+            if sleeptime:
+                print("Restarting in {} seconds...".format(loops*2))
+                time.sleep(sleeptime)
 
 
 if __name__ == '__main__':
