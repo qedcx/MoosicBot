@@ -6,7 +6,9 @@ import io
 import pydub
 import shlex
 import subprocess
+import functools
 
+from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 from array import array
 from collections import deque
@@ -100,6 +102,7 @@ class MusicPlayer(EventEmitter):
         self.playlist = playlist
         self.playlist.on('entry-added', self.on_entry_added)
         self._volume = bot.config.default_volume
+        self.thread_pool = ThreadPoolExecutor(max_workers=2)
 
         self._play_lock = asyncio.Lock()
         self._current_player = None
@@ -223,6 +226,43 @@ class MusicPlayer(EventEmitter):
     def play(self, _continue=False):
         self.loop.create_task(self._play(_continue=_continue))
 
+    def create_player(self, entry):
+        newPlayer = self.voice_client.create_ffmpeg_player(
+                entry.filename,
+                before_options="-nostdin",
+                options="-vn -b:a 128k",
+                # Threadsafe call soon, b/c after will be called from the voice playback thread.
+                after=lambda: self.loop.call_soon_threadsafe(self._playback_finished))
+
+        return newPlayer
+
+    def create_normalized_player(self, entry):
+        # Convert to raw audio
+        convertCommand = "ffmpeg -nostdin -i {} -f wav -ar {} -ac {} -loglevel warning -vn -b:a 128k pipe:1"
+        convertCommand = convertCommand.format(shlex.quote(entry.filename), self.voice_client.encoder.sampling_rate, self.voice_client.encoder.channels)
+        args = shlex.split(convertCommand)
+
+        try:
+            p = subprocess.Popen(args, stdin=None, stdout=subprocess.PIPE, stderr=None)
+        except FileNotFoundError as e:
+            print('ffmpeg/avconv was not found in your PATH environment variable')
+            return
+        except subprocess.SubprocessError as e:
+            print('Popen failed: {0.__name__} {1}'.format(type(e), str(e)))
+            return
+
+        # Load into pydub
+        sound = pydub.AudioSegment(p.stdout)
+
+        # Normalize the volume
+        target_dBFS = -15
+        change_in_dBFS = target_dBFS - sound.dBFS
+        normalized_sound = sound.apply_gain(change_in_dBFS)
+
+        # Create a player for the song
+        newPlayer = StreamPlayer(io.BytesIO(normalized_sound.raw_data), self.voice_client.encoder, self.voice_client._connected, self.voice_client.play_audio, lambda: self.loop.call_soon_threadsafe(self._playback_finished))
+        return newPlayer
+
     async def _play(self, _continue=False):
         """
             Plays the next entry from the playlist, or resumes playback of the current entry if paused.
@@ -253,30 +293,11 @@ class MusicPlayer(EventEmitter):
                 # In-case there was a player, kill it. RIP.
                 self._kill_current_player()
 
-                # Convert to raw audio
-                convertCommand = "ffmpeg -nostdin -i {} -f wav -ar {} -ac {} -loglevel warning -vn -b:a 128k pipe:1"
-                convertCommand = convertCommand.format(shlex.quote(entry.filename), self.voice_client.encoder.sampling_rate, self.voice_client.encoder.channels)
-                args = shlex.split(convertCommand)
-
-                try:
-                    p = subprocess.Popen(args, stdin=None, stdout=subprocess.PIPE, stderr=None)
-                except FileNotFoundError as e:
-                    print('ffmpeg/avconv was not found in your PATH environment variable')
-                    return
-                except subprocess.SubprocessError as e:
-                    print('Popen failed: {0.__name__} {1}'.format(type(e), str(e)))
-                    return
-
-                # Load into pydub
-                sound = pydub.AudioSegment(p.stdout)
-
-                # Normalize the volume
-                target_dBFS = -15
-                change_in_dBFS = target_dBFS - sound.dBFS
-                normalized_sound = sound.apply_gain(change_in_dBFS)
-
-                # Create a player for the song
-                newPlayer = StreamPlayer(io.BytesIO(normalized_sound.raw_data), self.voice_client.encoder, self.voice_client._connected, self.voice_client.play_audio, lambda: self.loop.call_soon_threadsafe(self._playback_finished))
+                # Create a player; don't normalize the volume of songs over 10 minutes (takes too long)
+                if entry.duration <= 600:
+                    newPlayer = await self.loop.run_in_executor(self.thread_pool, functools.partial(self.create_normalized_player, entry))
+                else:
+                    newPlayer = self.create_player(entry)
 
                 self._current_player = self._monkeypatch_player(newPlayer)
                 self._current_player.setDaemon(True)
