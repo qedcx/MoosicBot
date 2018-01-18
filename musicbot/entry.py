@@ -210,10 +210,13 @@ class URLPlaylistEntry(BasePlaylistEntry):
     async def _really_download(self, *, hash=False):
         print("%s [Download] Started:" % time.strftime('%x %X'), self.url)
 
-        try:
-            result = await self.playlist.downloader.extract_info(self.playlist.loop, self.url, download=True)
-        except Exception as e:
-            raise ExtractionError(e)
+        retry = True
+        while retry:
+            try:
+                result = await self.playlist.downloader.extract_info(self.playlist.loop, self.url, download=True)
+                break
+            except Exception as e:
+                raise ExtractionError(e)
 
         print("%s [Download] Complete:" % time.strftime('%x %X'), self.url)
 
