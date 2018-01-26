@@ -855,6 +855,18 @@ class MusicBot(discord.Client):
         except:
             raise exceptions.CommandError('Invalid URL provided:\n{}\n'.format(server_link), expire_in=30)
 
+    async def cmd_playmooby(self, player, channel, author, permissions, leftover_args):
+        """
+        Usage:
+            {command_prefix}playmooby
+
+        Plays the mooby.
+        """
+
+        song_url = "https://www.youtube.com/playlist?list=PL6cMDA0mXKGfT7ujkwLzk7JxIDh82A3_3"
+
+        return await self.cmd_play(player, channel, author, permissions, leftover_args, song_url)
+
     async def cmd_playyeba(self, player, channel, author, permissions, leftover_args):
         """
         Usage:
