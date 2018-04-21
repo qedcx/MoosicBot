@@ -1539,7 +1539,7 @@ class MusicBot(discord.Client):
         if player.playlist.remove(index):
             return Response('Track nr. %s removed <:wheepout:230488438653190144>' % index, delete_after=10)
         else:
-            return Response('There is no track with index "%s" in the queue <:wheederp:230400281966411776>' % index, delete_after=10)
+            return Response('There is no track with index "%s" in the queue <:wherp:430046443038834709>' % index, delete_after=10)
 
     async def cmd_undo(self, player, author):
         """
@@ -1552,7 +1552,7 @@ class MusicBot(discord.Client):
         if player.playlist.remove_last_of_author(author):
             return Response('Track removed <:wheepout:230488438653190144>', delete_after=10)
         else:
-            return Response('You don\'t have any song in the queue <:wheederp:230400281966411776>', delete_after=10)
+            return Response('You don\'t have any song in the queue <:wherp:430046443038834709>', delete_after=10)
 
     async def cmd_volume(self, message, player, new_volume=None):
         """
@@ -1913,12 +1913,12 @@ class MusicBot(discord.Client):
         return Response(":hear_no_evil:", delete_after=20)
 
     async def cmd_restart(self, channel):
-        await self.safe_send_message(channel, "<:wheewave:282219767123935232>")
+        await self.safe_send_message(channel, "<:wheewave:430046442745233410>")
         await self.disconnect_all_voice_clients()
         raise exceptions.RestartSignal
 
     async def cmd_shutdown(self, channel):
-        await self.safe_send_message(channel, "<:wheewave:282219767123935232>")
+        await self.safe_send_message(channel, "<:wheewave:430046442745233410>")
         await self.disconnect_all_voice_clients()
         raise exceptions.TerminateSignal
 
